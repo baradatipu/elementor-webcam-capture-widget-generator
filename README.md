@@ -1,6 +1,8 @@
 # 📷 Elementor Camera Widget Code Generator
 
 A powerful tool that generates unique camera widget code for Elementor forms, allowing users to capture photos with geolocation data directly within your WordPress forms.
+## **✨📖 [How to replace elementor input field to this live web camera capture button](https://github.com/baradatipu/elementor-camera-capture) ✨**
+
 
 ## 🌟 Features
 
