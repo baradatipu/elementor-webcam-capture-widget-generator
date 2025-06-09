@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Widget Code Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .form-section {
+            padding: 40px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .output-section {
+            padding: 40px;
+            background: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .output-header h3 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .copy-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #17a2b8;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .code-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .code-output::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .code-output::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .code-output::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .example-section {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+
+        .example-section h4 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+        }
+
+        .example-section code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-section {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-section, .output-section {
+                padding: 20px;
+            }
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #212529;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📷 Camera Widget Generator</h1>
+            <p>Generate unique camera widget code for Elementor forms</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-section">
+                <div class="example-section">
+                    <h4>📋 How to use:</h4>
+                    <p>1. Enter a unique <strong>Instance Name</strong> (e.g., "main", "1", "photo1")</p>
+                    <p>2. Enter your <strong>Elementor Field ID</strong> (inspect your file upload field)</p>
+                    <p>3. Click Generate to create unique code</p>
+                    <p>4. Copy and paste into your Elementor HTML widget</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="instanceName">Instance Name <span class="info-badge">Required</span></label>
+                    <input type="text" id="instanceName" placeholder="e.g., main, 1, photo1, secondary" value="main">
+                </div>
+
+                <div class="form-group">
+                    <label for="fieldId">Elementor Field ID <span class="info-badge">Required</span></label>
+                    <input type="text" id="fieldId" placeholder="e.g., field_a51b627" value="field_a51b627">
+                </div>
+
+                <div class="form-group">
+                    <label for="apiKey">OpenCage API Key <span class="info-badge">Optional</span></label>
+                    <input type="text" id="apiKey" placeholder="Your OpenCage API key (optional)" value="25d8a82fc75b466d8abd171971605b99">
+                </div>
+
+                <button class="generate-btn" onclick="generateCode()">🚀 Generate Unique Code</button>
+            </div>
+
+            <div class="output-section">
+                <div class="output-header">
+                    <h3>Generated Code</h3>
+                    <button class="copy-btn" onclick="copyCode()" id="copyBtn">📋 Copy Code</button>
+                </div>
+                <div class="code-output" id="codeOutput">
+                    Click "Generate Unique Code" to create your camera widget...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const templateCode = `<!-- Elementor Camera Widget -->
+<div class="custom-camera-field" style="margin: 20px auto; max-width: 400px; text-align: center;">
+  <label style="display: block; font-weight: bold; margin-bottom: 10px;">Capture Photo with Location</label>
+  <button type="button" id="cameraBtn_{{INSTANCE}}" style="padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">📷 Start Camera</button>
+  <video id="cameraVideo_{{INSTANCE}}" style="display: none; width: 100%; margin-top: 10px; border-radius: 6px;" playsinline></video>
+  <img id="previewImage_{{INSTANCE}}" style="display: none; width: 100%; margin-top: 10px; border-radius: 6px;" />
+  <div id="photoControls_{{INSTANCE}}" style="margin-top: 10px; display: none;">
+    <button type="button" id="retakeBtn_{{INSTANCE}}" style="padding: 8px 16px; background: #999; color: white; border: none; border-radius: 4px; cursor: pointer;">🔁 Retake</button>
+    <button type="button" id="useBtn_{{INSTANCE}}" style="padding: 8px 16px; background: green; color: white; border: none; border-radius: 4px; cursor: pointer;">✅ Use Photo</button>
+  </div>
+  <div id="photoStatus_{{INSTANCE}}" style="margin-top: 10px; display: none;"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Define all HTML elements for instance: {{INSTANCE}}
+  const cameraBtn = document.getElementById('cameraBtn_{{INSTANCE}}');
+  const video = document.getElementById('cameraVideo_{{INSTANCE}}');
+  const previewImage = document.getElementById('previewImage_{{INSTANCE}}');
+  const retakeBtn = document.getElementById('retakeBtn_{{INSTANCE}}');
+  const useBtn = document.getElementById('useBtn_{{INSTANCE}}');
+  const photoStatus = document.getElementById('photoStatus_{{INSTANCE}}');
+  const photoControls = document.getElementById('photoControls_{{INSTANCE}}');
+
+  // Check if all elements exist
+  if (!cameraBtn || !video || !previewImage || !retakeBtn || !useBtn || !photoStatus || !photoControls) {
+    console.error('Camera widget elements not found for instance: {{INSTANCE}}');
+    return;
+  }
+
+  let canvas = document.createElement('canvas');
+  let stream = null;
+  let currentLocation = null;
+  let capturedBlob = null;
+  let capturedLoc = null;
+  let capturedAddress = null;
+
+  // Get browser geolocation
+  function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject('Geolocation not supported');
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          timestamp: new Date().toISOString()
+        }),
+        err => reject(err),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  }
+
+  // Fetch human-readable address from OpenCage API
+  async function getAddress(lat, lon) {
+    const key = '{{API_KEY}}';
+    if (!key || key === 'YOUR_API_KEY_HERE') return null;
+    const url = \`https://api.opencagedata.com/geocode/v1/json?q=\${lat}+\${lon}&key=\${key}\`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.results?.[0]?.formatted || null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Format timestamp to readable string
+  function formatDateTime(isoString) {
+    const date = new Date(isoString);
+    const day = date.getDate();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const suffix = (d) => {
+      if (d > 3 && d < 21) return "th";
+      switch (d % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
+    };
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hr = hours % 12 || 12;
+    return \`\${day}\${suffix(day)} \${monthNames[date.getMonth()]} \${date.getFullYear()}, \${hr}:\${minutes} \${ampm}\`;
+  }
+
+  // Add location and timestamp text over photo
+  function addGeoTagToImage(canvas, loc, address) {
+    const ctx = canvas.getContext('2d');
+    const footerHeight = 100;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, canvas.height - footerHeight, canvas.width, footerHeight);
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    let y = canvas.height - footerHeight + 20;
+    if (address) ctx.fillText(\`📍 \${address}\`, 10, y), y += 20;
+    ctx.fillText(\`🌐 \${loc.latitude.toFixed(6)}, \${loc.longitude.toFixed(6)}\`, 10, y); y += 20;
+    ctx.fillText(\`🕒 \${formatDateTime(loc.timestamp)}\`, 10, y); y += 20;
+    ctx.fillText(\`📏 Accuracy: ±\${Math.round(loc.accuracy)}m\`, 10, y);
+  }
+
+  // Upload image to Elementor file field
+  function uploadToElementorField(blob, loc, address) {
+    const fileInput = document.querySelector('#form-field-{{FIELD_ID}}');
+    if (!fileInput) {
+      photoStatus.innerHTML = '❌ File input not found! Check field ID: {{FIELD_ID}}';
+      photoStatus.style.color = 'red';
+      photoStatus.style.display = 'block';
+      return;
+    }
+
+    const file = new File([blob], 'photo_with_location_{{INSTANCE}}.jpg', { type: 'image/jpeg' });
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Add optional hidden input for location info
+    let hidden = document.querySelector('input[name="geo_info_{{INSTANCE}}"]');
+    if (!hidden) {
+      hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'geo_info_{{INSTANCE}}';
+      const form = document.querySelector('form');
+      if (form) form.appendChild(hidden);
+    }
+    
+    if (hidden && loc) {
+      hidden.value = \`Address: \${address || 'N/A'}, Coordinates: \${loc.latitude.toFixed(6)},\${loc.longitude.toFixed(6)}, Time: \${formatDateTime(loc.timestamp)}\`;
+    }
+
+    photoStatus.innerHTML = '✅ Photo uploaded successfully!';
+    photoStatus.style.color = 'green';
+    photoStatus.style.display = 'block';
+  }
+
+  // Main camera button click
+  cameraBtn.addEventListener('click', async () => {
+    if (!stream) {
+      cameraBtn.textContent = 'Getting Location...';
+      try {
+        currentLocation = await getCurrentLocation();
+      } catch {
+        currentLocation = null;
+      }
+      cameraBtn.textContent = 'Starting Camera...';
+
+      try {
+        try {
+          // Try rear camera first
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+          });
+        } catch {
+          // Fallback to default camera
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
+          });
+        }
+
+        video.srcObject = stream;
+        await video.play();
+        video.style.display = 'block';
+        cameraBtn.textContent = '📸 Take Photo';
+      } catch {
+        photoStatus.innerHTML = '❌ Camera permission denied!';
+        photoStatus.style.color = 'red';
+        photoStatus.style.display = 'block';
+        cameraBtn.textContent = '📷 Start Camera';
+        return;
+      }
+    } else {
+      // Capture image
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      if (currentLocation) {
+        const addr = await getAddress(currentLocation.latitude, currentLocation.longitude);
+        addGeoTagToImage(canvas, currentLocation, addr);
+        capturedLoc = currentLocation;
+        capturedAddress = addr;
+      }
+      capturedBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 1.0));
+      previewImage.src = URL.createObjectURL(capturedBlob);
+      previewImage.style.display = 'block';
+      video.style.display = 'none';
+      photoControls.style.display = 'flex';
+      cameraBtn.style.display = 'none';
+    }
+  });
+
+  retakeBtn.addEventListener('click', () => {
+    previewImage.style.display = 'none';
+    cameraBtn.style.display = 'inline-block';
+    photoControls.style.display = 'none';
+    video.style.display = 'block';
+    photoStatus.style.display = 'none';
+  });
+
+  useBtn.addEventListener('click', () => {
+    uploadToElementorField(capturedBlob, capturedLoc, capturedAddress);
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    video.style.display = 'none';
+    photoControls.style.display = 'none';
+    cameraBtn.textContent = '📷 Capture Another Photo';
+    cameraBtn.style.display = 'inline-block';
+    stream = null;
+  });
+});
+<\/script>`;
+
+        function generateCode() {
+            const instanceName = document.getElementById('instanceName').value.trim();
+            const fieldId = document.getElementById('fieldId').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim() || 'YOUR_API_KEY_HERE';
+
+            if (!instanceName) {
+                alert('Please enter an Instance Name');
+                return;
+            }
+
+            if (!fieldId) {
+                alert('Please enter an Elementor Field ID');
+                return;
+            }
+
+            // Generate the code
+            let generatedCode = templateCode
+                .replace(/\{\{INSTANCE\}\}/g, instanceName)
+                .replace(/\{\{FIELD_ID\}\}/g, fieldId)
+                .replace(/\{\{API_KEY\}\}/g, apiKey);
+
+            document.getElementById('codeOutput').textContent = generatedCode;
+        }
+
+        function copyCode() {
+            const codeOutput = document.getElementById('codeOutput');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            // Create a temporary textarea to copy the code
+            const textarea = document.createElement('textarea');
+            textarea.value = codeOutput.textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            // Update button to show copied status
+            copyBtn.textContent = '✅ Copied!';
+            copyBtn.classList.add('copied');
+            
+            setTimeout(() => {
+                copyBtn.textContent = '📋 Copy Code';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        }
+
+        // Generate initial code on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCode();
+        });
+
+        // Auto-generate code when inputs change
+        document.getElementById('instanceName').addEventListener('input', generateCode);
+        document.getElementById('fieldId').addEventListener('input', generateCode);
+        document.getElementById('apiKey').addEventListener('input', generateCode);
+    </script>
+</body>
+</html>
