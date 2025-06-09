@@ -15,7 +15,7 @@ A powerful tool that generates unique camera widget code for Elementor forms, al
 ## 🚀 Quick Start
 
 ### Step 1: Open the Generator
-Open the `index.html` file in your browser to access the Camera Widget Code Generator.
+Open the `index.html` or https://baradatipu.me/elementor-webcam-capture-widget-generator/ file in your browser to access the Camera Widget Code Generator.
 
 ### Step 2: Configure Your Widget
 1. **Instance Name**: Enter a unique identifier (e.g., "main", "photo1", "secondary")
